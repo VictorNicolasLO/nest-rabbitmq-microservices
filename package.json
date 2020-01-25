@@ -1,8 +1,8 @@
 {
-  "name": "@nestjsplus/nestjs-package-starter",
-  "version": "1.0.0",
-  "description": "NestJS npm package starter",
-  "author": "John Biundo <johnfbiundo@gmail.com>",
+  "name": "nest-rabbitmq-microservices",
+  "version": "1.0.12",
+  "description": "NestJs RabbitMQ Microservices module",
+  "author": "Victor Nicolas Lizarraga Ochoa",
   "license": "MIT",
   "readmeFilename": "README.md",
   "main": "dist/test.js",
@@ -29,17 +29,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nestjsplus/nestjs-package-starter"
+    "url": ""
   },
-  "bugs": "https://github.com/nestjsplus/nestjs-package-starter",
+  "bugs": "",
   "peerDependencies": {
     "@nestjs/common": "^6.0.0"
   },
   "dependencies": {},
   "devDependencies": {
-    "@nestjs/common": "^6.0.0",
-    "@nestjs/core": "^6.0.0",
-    "@nestjs/platform-express": "^6.0.0",
+    "@nestjs-plus/rabbitmq": "^1.4.4",
+    "@nestjs/common": "^6.7.2",
+    "@nestjs/core": "^6.7.2",
+    "@nestjs/microservices": "^6.10.11",
+    "@nestjs/platform-express": "^6.7.2",
+    "amqp-connection-manager": "^3.1.1",
+    "amqplib": "^0.5.5",
     "@nestjs/testing": "6.1.1",
     "@types/express": "4.16.1",
     "@types/jest": "24.0.11",
@@ -53,6 +57,7 @@
     "tsc-watch": "2.2.1",
     "tsconfig-paths": "3.8.0",
     "tslint": "5.16.0",
+    "rxjs": "^6.5.3",
     "typescript": "3.4.3"
   },
   "jest": {
