@@ -22,3 +22,40 @@ export function Subscribe(pattern: string) {
     })(target, key, descriptor);
   };
 }
+
+export function EmmitEvents(
+  AppName,
+  success,
+  error?,
+  interceptor?: (req, res) => any,
+): any {
+  return (target, key, descriptor) => {
+    const originalMethod = descriptor.value;
+    // tslint:disable-next-line: only-arrow-functions
+    descriptor.value = async function(...args) {
+      const [{ data, eventId, correlationId }] = args;
+      try {
+        const response = await originalMethod.apply(this, args);
+        const eventData = interceptor
+          ? interceptor(data, response)
+          : { request: data, response };
+        this.broker.publish(`${AppName}.${success}`, eventData, {
+          causationId: eventId,
+          correlationId,
+        });
+        return response;
+      } catch (e) {
+        this.broker.publish(
+          `${AppName}.${error || 'failed'}`,
+          { request: data, response: e },
+          {
+            causationId: eventId,
+            correlationId,
+          },
+        );
+        throw e;
+      }
+    };
+    return descriptor;
+  };
+}
