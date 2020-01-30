@@ -4,3 +4,4 @@
 export * from './lib/decorators';
 export { RabbitMicroservices } from './lib/rabbit-microservices.module';
 export * from './lib/services/broker.service';
+export { Message } from './lib/types';
