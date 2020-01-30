@@ -1,41 +1,91 @@
-<h1 align="center"></h1>
+# Nest rabbitmq microservices
 
-<div align="center">
-  <a href="http://nestjs.com/" target="_blank">
-    <img src="https://nestjs.com/img/logo_text.svg" width="150" alt="Nest Logo" />
-  </a>
-</div>
+## Description
 
-<h3 align="center">NestJS npm Package Starter</h3>
+This module is based in [@nestjs-plus/rabbitmq](https://www.npmjs.com/package/@nestjs-plus/rabbitmq) to facilitate the usage of event and rpc patterns between rabbitmq and nestjs.
 
-<div align="center">
-  <a href="https://nestjs.com" target="_blank">
-    <img src="https://img.shields.io/badge/built%20with-NestJs-red.svg" alt="Built with NestJS">
-  </a>
-</div>
+## Usage
 
-### Installation
+Init the module in your nest app.
 
-1. Clone the repo
-2. Run npm/yarn install
+    // app.module.ts
+    import { Module } from '@nestjs/common';
+    import { RabbitMicroservices } from 'nest-rabbitmq-microservices';
+    const appName = "my-app"
+    @Module({
+      imports: [
+        RabbitMicroservices.forRootAsync({
+          useFactory: (config: ConfigService) => {
+            return {
+              exchanges: [
+                {
+                  name: `rpc.${appName}`, // For RPC comunications
+                  type: 'topic',
+                },
+                {
+                  name: `event.${appName}`, // For events
+                  type: 'topic',
+                },
+              ],
+              uri: "amqp://localhost:5672",
+            };
+          },
+          imports: [ConfigModule.forRoot()],
+          inject: [ConfigService],
+        }),
 
-```bash
-cd nestjs-package-starter
-npm install
-```
+      ],
+     providers: [
+        AppController, // All controllers have to be imported as service
+      ],
+    })
+    export class AppModule {}
 
-## Change Log
+Define your controller with events or RPC methods by using the `Rpc` or `Subscribe` decorators where `Rpc` can be combined with `EmmitEvents` for automatically produce events of the method.
 
-See [Changelog](CHANGELOG.md) for more information.
+    import { Injectable } from '@nestjs/common';
+    import { BrokerService, Rpc, Message, EmmitEvents, Subscribe } from 'nest-rabbitmq-microservices';
 
-## Contributing
+    const appName = "my-app"
+    const emmiterApp = "my-app" // because of same app
+    @Injectable()
+    export class AppController {
+      constructor(
+        private readonly broker: BrokerService, // This always has to be imported
+      ) {}
 
-Contributions welcome! See [Contributing](CONTRIBUTING.md).
+      @Rpc(`${appName}.create-cat`)
+      @EmmitEvents(appName, 'cat-created', 'cat-creation-failed')
+      createCat({
+        data,
+    		correlationId, // If you need them
+    		eventId,
+        causationId
+      }: Message<any>): Promise<SignInResponseDto> {
+    	   return { cat : data.cat }
+      }
 
-## Author
+    	@Subcribe(`${appName}.${emmiterApp}.cat-created`)
+      sayCat({ data }:Message<any>){
+    		console.log(data)
+    	}
 
-**John Biundo (Y Prospect on [Discord](https://discord.gg/G7Qnnhy))**
+    }
 
-## License
+### Now how to try it ?
 
-Licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+You can try it by using `BrokerService` included in the package.
+
+    import { Get } from '@nestjs/common';
+    import { BrokerService } from 'nest-rabbitmq-microservices';
+
+
+    @Controller()
+    export class AppController {
+      constructor(private readonly broker: BrokerService) {}
+
+      @Get('/create-cat')
+      login(@Body() cat): Promise<any> {
+        return this.broker.send({ name : "michi" });
+      }
+    }
