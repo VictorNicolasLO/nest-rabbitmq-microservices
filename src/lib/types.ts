@@ -5,9 +5,9 @@ export interface AsyncOptions {
 }
 
 export interface Message<T> {
-  correlationId: string;
-  eventId: string;
-  causationId: string;
+  correlationId?: string;
+  eventId?: string;
+  causationId?: string;
   data: T;
-  date: Date;
+  date?: Date;
 }

@@ -1,6 +1,6 @@
 {
   "name": "nest-rabbitmq-microservices",
-  "version": "1.0.22",
+  "version": "1.0.24",
   "description": "NestJs RabbitMQ Microservices module",
   "author": "Victor Nicolas Lizarraga Ochoa",
   "license": "MIT",
