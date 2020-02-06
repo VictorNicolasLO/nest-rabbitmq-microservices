@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { AmqpConnection } from '@nestjs-plus/rabbitmq';
 import { RpcException } from '@nestjs/microservices';
 import uuid = require('uuid/v1');
+import { setBroker, getMigrations } from '../decorators';
+import { MigrationProcess } from '../helpers/migration-process';
 
 interface Ids {
   correlationId?: string;
@@ -9,8 +11,19 @@ interface Ids {
   causationId?: string;
 }
 @Injectable()
-export class BrokerService {
-  constructor(public readonly connection: AmqpConnection) {}
+export class BrokerService implements OnModuleInit {
+  constructor(public readonly connection: AmqpConnection) {
+    setBroker(this);
+  }
+  async onModuleInit() {
+    await this.migrate();
+  }
+
+  private async migrate() {
+    const migrations = getMigrations();
+    const migrationProcess = new MigrationProcess(this, migrations);
+    migrationProcess.startMigration();
+  }
 
   async send(pattern: string, data: any, ids: Ids = {}) {
     const [appName, action] = pattern.split('.');
